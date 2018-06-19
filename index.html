@@ -284,6 +284,153 @@
   
   
   <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://springhao.com/2018/06/19/json/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Hero Hao">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="IT Hero">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2018/06/19/json/" itemprop="url">json</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2018-06-19T09:33:14+08:00">
+                2018-06-19
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/hibernate/" itemprop="url" rel="index">
+                    <span itemprop="name">hibernate</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <h1 id="Json转换对Hibernate懒加载的支持"><a href="#Json转换对Hibernate懒加载的支持" class="headerlink" title="Json转换对Hibernate懒加载的支持"></a>Json转换对Hibernate懒加载的支持</h1><p>在使用Hibernate的多表关联中，为了提高效率我们通常使用懒加载模式进行关联，但懒加载模式对于关联的对象在为创建时对象信息为报错信息。<br>所以在进行json转换时候就会报错，报错信息暂时没有贴出来。不过fastjson对hibernate是有模块支持的。</p>
+<h2 id="一、首先pom文件添加maven引用-我这里使用的是Hibernate5"><a href="#一、首先pom文件添加maven引用-我这里使用的是Hibernate5" class="headerlink" title="一、首先pom文件添加maven引用(我这里使用的是Hibernate5)"></a>一、首先pom文件添加maven引用(我这里使用的是Hibernate5)</h2><figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>com.fasterxml.jackson.core<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>jackson-databind<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">version</span>&gt;</span>2.3.3<span class="tag">&lt;/<span class="name">version</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>com.fasterxml.jackson.datatype<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>jackson-datatype-hibernate5<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">version</span>&gt;</span>2.9.5<span class="tag">&lt;/<span class="name">version</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<h2 id="二、在Json工具类中添加如下代码"><a href="#二、在Json工具类中添加如下代码" class="headerlink" title="二、在Json工具类中添加如下代码"></a>二、在Json工具类中添加如下代码</h2><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">JsonTool</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">final</span> ObjectMapper mapper;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> JsonTool INSTANCE = <span class="keyword">new</span> JsonTool();</span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="title">JsonTool</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        mapper = <span class="keyword">new</span> ObjectMapper();</span><br><span class="line">        mapper.setSerializationInclusion(JsonInclude.Include.NON_EMPTY);</span><br><span class="line">        Hibernate5Module <span class="keyword">module</span> = <span class="keyword">new</span> Hibernate5Module();</span><br><span class="line">        <span class="keyword">module</span>.enable(Hibernate5Module.Feature.FORCE_LAZY_LOADING);</span><br><span class="line">        mapper.registerModule(<span class="keyword">module</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    ...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>这样就开启了fastjson对Hibernate的支持。</p>
+<h2 id="三、全部的json工具类代码"><a href="#三、全部的json工具类代码" class="headerlink" title="三、全部的json工具类代码"></a>三、全部的json工具类代码</h2><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br><span class="line">141</span><br><span class="line">142</span><br><span class="line">143</span><br><span class="line">144</span><br><span class="line">145</span><br><span class="line">146</span><br><span class="line">147</span><br><span class="line">148</span><br><span class="line">149</span><br><span class="line">150</span><br><span class="line">151</span><br><span class="line">152</span><br><span class="line">153</span><br><span class="line">154</span><br><span class="line">155</span><br><span class="line">156</span><br><span class="line">157</span><br><span class="line">158</span><br><span class="line">159</span><br><span class="line">160</span><br><span class="line">161</span><br><span class="line">162</span><br><span class="line">163</span><br><span class="line">164</span><br><span class="line">165</span><br><span class="line">166</span><br><span class="line">167</span><br><span class="line">168</span><br><span class="line">169</span><br><span class="line">170</span><br><span class="line">171</span><br><span class="line">172</span><br><span class="line">173</span><br><span class="line">174</span><br><span class="line">175</span><br><span class="line">176</span><br><span class="line">177</span><br><span class="line">178</span><br><span class="line">179</span><br><span class="line">180</span><br><span class="line">181</span><br><span class="line">182</span><br><span class="line">183</span><br><span class="line">184</span><br><span class="line">185</span><br><span class="line">186</span><br><span class="line">187</span><br><span class="line">188</span><br><span class="line">189</span><br><span class="line">190</span><br><span class="line">191</span><br><span class="line">192</span><br><span class="line">193</span><br><span class="line">194</span><br><span class="line">195</span><br><span class="line">196</span><br><span class="line">197</span><br><span class="line">198</span><br><span class="line">199</span><br><span class="line">200</span><br><span class="line">201</span><br><span class="line">202</span><br><span class="line">203</span><br><span class="line">204</span><br><span class="line">205</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">JsonTool</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">final</span> ObjectMapper mapper;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> JsonTool INSTANCE = <span class="keyword">new</span> JsonTool();</span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="title">JsonTool</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        mapper = <span class="keyword">new</span> ObjectMapper();</span><br><span class="line">        mapper.setSerializationInclusion(JsonInclude.Include.NON_EMPTY);</span><br><span class="line">        <span class="comment">//忽略在JSON字符串中存在但Java对象实际没有的属性</span></span><br><span class="line">        mapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);</span><br><span class="line"><span class="comment">//      mapper.configure(D)</span></span><br><span class="line">        mapper.configure(DeserializationFeature.ACCEPT_SINGLE_VALUE_AS_ARRAY,<span class="keyword">true</span>);</span><br><span class="line">        mapper.configure(Feature.ALLOW_UNQUOTED_CONTROL_CHARS, <span class="keyword">true</span>) ;  </span><br><span class="line"></span><br><span class="line">        mapper.registerModule(<span class="keyword">new</span> JodaModule());</span><br><span class="line">        Hibernate5Module <span class="keyword">module</span> = <span class="keyword">new</span> Hibernate5Module();</span><br><span class="line">        <span class="keyword">module</span>.enable(Hibernate5Module.Feature.FORCE_LAZY_LOADING);</span><br><span class="line">        mapper.registerModule(<span class="keyword">module</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 如果对象为Null, 返回"null".</span></span><br><span class="line"><span class="comment">     * 如果集合为空集合, 返回"[]".</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> String <span class="title">objToJsonStr</span><span class="params">(Object object)</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            <span class="keyword">return</span> mapper.writeValueAsString(object);</span><br><span class="line">        &#125; <span class="keyword">catch</span> (IOException e) &#123;</span><br><span class="line">            <span class="keyword">throw</span> NestedException.wrap(e);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> String <span class="title">objToPrettyJson</span><span class="params">(Object object)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            <span class="keyword">return</span> mapper.writerWithDefaultPrettyPrinter().writeValueAsString(object);</span><br><span class="line">        &#125; <span class="keyword">catch</span> (IOException e) &#123;</span><br><span class="line">            <span class="keyword">throw</span> NestedException.wrap(e);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 转化""字符串</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> String <span class="title">objToJsonSpecial</span><span class="params">(Object object)</span></span>&#123;</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);</span><br><span class="line">            <span class="keyword">return</span> mapper.writeValueAsString(object);</span><br><span class="line">        &#125; <span class="keyword">catch</span> (IOException e) &#123;</span><br><span class="line">            <span class="keyword">throw</span> NestedException.wrap(e);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 如果JSON字符串为Null或"null"字符串, 返回Null.</span></span><br><span class="line"><span class="comment">     * 如果JSON字符串为"[]", 返回空集合.</span></span><br><span class="line"><span class="comment">     *</span></span><br><span class="line"><span class="comment">     * 如需读取集合如List/Map, 且不是List&lt;String&gt;这种简单类型时,先使用函數constructParametricType构造类型.</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@see</span> #constructParametricType(Class, Class...)</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">public</span> &lt;T&gt; <span class="function">T <span class="title">jsonStrToObj</span><span class="params">(String jsonString, Class&lt;T&gt; clazz)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">if</span> (Strings.isEmpty(jsonString)) &#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="keyword">null</span>;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            <span class="keyword">return</span> mapper.readValue(jsonString, clazz);</span><br><span class="line">        &#125; <span class="keyword">catch</span> (IOException e) &#123;</span><br><span class="line">            <span class="keyword">throw</span> NestedException.wrap(e);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 如果JSON字符串为Null或"null"字符串, 返回Null.</span></span><br><span class="line"><span class="comment">     * 如果JSON字符串为"[]", 返回空集合.</span></span><br><span class="line"><span class="comment">     *</span></span><br><span class="line"><span class="comment">     * 如需读取集合如List/Map, 且不是List&lt;String&gt;这种简单类型时,先使用函數constructParametricType构造类型.</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@see</span> #constructParametricType(Class, Class...)</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="meta">@SuppressWarnings</span>(<span class="string">"unchecked"</span>)</span><br><span class="line">    <span class="keyword">public</span> &lt;T&gt; <span class="function">T <span class="title">jsonStrToObj</span><span class="params">(String jsonString, JavaType javaType)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">if</span> (Strings.isEmpty(jsonString)) &#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="keyword">null</span>;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            <span class="keyword">return</span> (T) mapper.readValue(jsonString, javaType);</span><br><span class="line">        &#125; <span class="keyword">catch</span> (IOException e) &#123;</span><br><span class="line">            <span class="keyword">throw</span> NestedException.wrap(e);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="meta">@SuppressWarnings</span>(<span class="string">"unchecked"</span>)</span><br><span class="line">    <span class="keyword">public</span> &lt;T&gt; <span class="function">List&lt;T&gt; <span class="title">jsonStrToList</span><span class="params">(String jsonString, Class&lt;T&gt; clazz)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            JavaType javaType = getCollectionType(ArrayList.class, clazz); </span><br><span class="line">            <span class="keyword">return</span> (List&lt;T&gt;) mapper.readValue(jsonString, javaType);</span><br><span class="line">        &#125; <span class="keyword">catch</span> (IOException e) &#123;</span><br><span class="line">            e.printStackTrace();</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">null</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="meta">@SuppressWarnings</span>(<span class="string">"unchecked"</span>)</span><br><span class="line">    <span class="keyword">public</span> &lt;T&gt; <span class="function">T <span class="title">jsonStrToObj</span><span class="params">(String jsonString, Class&lt;?&gt; parametrized, Class&lt;?&gt;... parameterClasses)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> (T) <span class="keyword">this</span>.jsonStrToObj(jsonString, constructParametricType(parametrized, parameterClasses));</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 構造泛型的Type如List&lt;MyBean&gt;, 则调用constructParametricType(ArrayList.class,MyBean.class)</span></span><br><span class="line"><span class="comment">     *             Map&lt;String,MyBean&gt;则调用(HashMap.class,String.class, MyBean.class)</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> JavaType <span class="title">constructParametricType</span><span class="params">(Class&lt;?&gt; parametrized, Class&lt;?&gt;... parameterClasses)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> mapper.getTypeFactory().constructParametricType(parametrized, parameterClasses);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> JavaType <span class="title">getCollectionType</span><span class="params">(Class&lt;?&gt; collectionClass, Class&lt;?&gt;... elementClasses)</span> </span>&#123;   </span><br><span class="line">        <span class="keyword">return</span> mapper.getTypeFactory().constructParametricType(collectionClass, elementClasses);   </span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 當JSON裡只含有Bean的部分屬性時，更新一個已存在Bean，只覆蓋該部分的屬性.</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="meta">@SuppressWarnings</span>(<span class="string">"unchecked"</span>)</span><br><span class="line">    <span class="keyword">public</span> &lt;T&gt; <span class="function">T <span class="title">update</span><span class="params">(T object, String jsonString)</span> <span class="keyword">throws</span> JsonProcessingException,IOException </span>&#123;</span><br><span class="line">            <span class="keyword">return</span> (T) mapper.readerForUpdating(object).readValue(jsonString);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 輸出JSONP格式數據.</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> String <span class="title">objToJsonP</span><span class="params">(String functionName, Object object)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> objToJsonStr(<span class="keyword">new</span> JSONPObject(functionName, object));</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 設定是否使用Enum的toString函數來讀寫Enum,</span></span><br><span class="line"><span class="comment">     * 為False時時使用Enum的name()函數來讀寫Enum, 默認為False.</span></span><br><span class="line"><span class="comment">     * 注意本函數一定要在Mapper創建後, 所有的讀寫動作之前調用.</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">setEnumUseToString</span><span class="params">(<span class="keyword">boolean</span> value)</span> </span>&#123;</span><br><span class="line">        mapper.configure(SerializationFeature.WRITE_ENUMS_USING_TO_STRING, value);</span><br><span class="line">        mapper.configure(DeserializationFeature.READ_ENUMS_USING_TO_STRING, value);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 取出Mapper做进一步的设置或使用其他序列化API.</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> ObjectMapper <span class="title">getMapper</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> mapper;</span><br><span class="line">    &#125;</span><br><span class="line"><span class="comment">//  /**</span></span><br><span class="line"><span class="comment">//   * 将对象转化为json字符串</span></span><br><span class="line"><span class="comment">//   *</span></span><br><span class="line"><span class="comment">//   * @param obj</span></span><br><span class="line"><span class="comment">//   * @return null or obj</span></span><br><span class="line"><span class="comment">//   * @throws JsonMappingException</span></span><br><span class="line"><span class="comment">//   */</span></span><br><span class="line"><span class="comment">//  public static String objToJsonStr(Object obj) throws JsonMappingException &#123;</span></span><br><span class="line"><span class="comment">//      ObjectMapper om = new ObjectMapper();</span></span><br><span class="line"><span class="comment">//      String str = null;</span></span><br><span class="line"><span class="comment">//      try &#123;</span></span><br><span class="line"><span class="comment">//          str = om.writeValueAsString(obj);</span></span><br><span class="line"><span class="comment">//      &#125; catch (JsonGenerationException e) &#123;</span></span><br><span class="line"><span class="comment">//          // TODO Auto-generated catch block</span></span><br><span class="line"><span class="comment">//          e.printStackTrace();</span></span><br><span class="line"><span class="comment">//      &#125; catch (JsonMappingException e) &#123;</span></span><br><span class="line"><span class="comment">//          // TODO Auto-generated catch block</span></span><br><span class="line"><span class="comment">//          e.printStackTrace();</span></span><br><span class="line"><span class="comment">//          throw e;</span></span><br><span class="line"><span class="comment">//      &#125; catch (IOException e) &#123;</span></span><br><span class="line"><span class="comment">//          // TODO Auto-generated catch block</span></span><br><span class="line"><span class="comment">//          e.printStackTrace();</span></span><br><span class="line"><span class="comment">//      &#125;</span></span><br><span class="line"><span class="comment">//      return str;</span></span><br><span class="line"><span class="comment">//  &#125;</span></span><br><span class="line"></span><br><span class="line"><span class="comment">//  /**</span></span><br><span class="line"><span class="comment">//   * 将json字符串转换为对象</span></span><br><span class="line"><span class="comment">//   *</span></span><br><span class="line"><span class="comment">//   * @param jsonStr</span></span><br><span class="line"><span class="comment">//   * @param clazz</span></span><br><span class="line"><span class="comment">//   * @return null or object of clazz</span></span><br><span class="line"><span class="comment">//   * @throws JsonMappingException</span></span><br><span class="line"><span class="comment">//   * @throws JsonParseException</span></span><br><span class="line"><span class="comment">//   */</span></span><br><span class="line"><span class="comment">//  public static &lt;T&gt; T jsonStrToObj(String jsonStr, Class&lt;T&gt; clazz) throws JsonMappingException, JsonParseException &#123;</span></span><br><span class="line"><span class="comment">//      ObjectMapper om = new ObjectMapper();</span></span><br><span class="line"><span class="comment">//      //-------</span></span><br><span class="line"><span class="comment">//      om.configure(DeserializationConfig.Feature.ACCEPT_SINGLE_VALUE_AS_ARRAY, true);</span></span><br><span class="line"><span class="comment">//      //-------</span></span><br><span class="line"><span class="comment">//      T obj = null;</span></span><br><span class="line"><span class="comment">//      try &#123;</span></span><br><span class="line"><span class="comment">//          obj = om.readValue(jsonStr, clazz);</span></span><br><span class="line"><span class="comment">//      &#125; catch (JsonParseException e) &#123;</span></span><br><span class="line"><span class="comment">//          e.printStackTrace();</span></span><br><span class="line"><span class="comment">//          throw e;</span></span><br><span class="line"><span class="comment">//      &#125; catch (JsonMappingException e) &#123;</span></span><br><span class="line"><span class="comment">//          e.printStackTrace();</span></span><br><span class="line"><span class="comment">//          throw e;</span></span><br><span class="line"><span class="comment">//      &#125; catch (IOException e) &#123;</span></span><br><span class="line"><span class="comment">//          e.printStackTrace();</span></span><br><span class="line"><span class="comment">//      &#125;</span></span><br><span class="line"><span class="comment">//      return obj;</span></span><br><span class="line"><span class="comment">//  &#125;</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String args[])</span></span>&#123;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+	<div>
+	  
+	</div>
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
     <link itemprop="mainEntityOfPage" href="http://springhao.com/2018/06/14/springboot-quartz/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -597,7 +744,7 @@
           
             <div class="site-state-item site-state-posts">
               <a href="/archives/">
-                <span class="site-state-item-count">2</span>
+                <span class="site-state-item-count">3</span>
                 <span class="site-state-item-name">posts</span>
               </a>
             </div>
@@ -608,7 +755,7 @@
             
             <div class="site-state-item site-state-categories">
               <a href="/categories/index.html">
-                <span class="site-state-item-count">1</span>
+                <span class="site-state-item-count">2</span>
                 <span class="site-state-item-name">categories</span>
               </a>
             </div>
@@ -619,7 +766,7 @@
             
             <div class="site-state-item site-state-tags">
               <a href="/tags/index.html">
-                <span class="site-state-item-count">6</span>
+                <span class="site-state-item-count">12</span>
                 <span class="site-state-item-name">tags</span>
               </a>
             </div>
